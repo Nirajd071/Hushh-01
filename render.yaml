@@ -1,0 +1,15 @@
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: kai-marketplace
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # set manually in Render dashboard
+      - key: SESSION_SECRET
+        sync: false # set manually in Render dashboard
