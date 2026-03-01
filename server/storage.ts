@@ -581,13 +581,17 @@ export class DatabaseStorage implements IStorage {
   async sendMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
     const conversation = await this.getOrCreateConversation(senderId, receiverId);
 
+    // Auto-detect file messages (base64 data URLs)
+    const isFile = content.startsWith("data:") || content.startsWith("__FILE__:");
+    const msgType = isFile ? "file" : "text";
+
     const [message] = await db
       .insert(messages)
       .values({
         conversationId: conversation.id,
         senderId,
         content,
-        type: "text",
+        type: msgType,
         read: false,
       })
       .returning();
@@ -597,7 +601,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(conversations)
       .set({
-        lastMessageContent: content,
+        lastMessageContent: isFile ? "📎 Attachment" : content,
         lastMessageSenderId: senderId,
         lastMessageAt: new Date(),
         updatedAt: new Date(),
